@@ -4,10 +4,7 @@
 
 #include "608.h"
 
-void parse_608(uint8_t hi, uint8_t lo);
-void parse_608_command(uint8_t hi, uint8_t lo);
-
-void parse_608(uint8_t hi, uint8_t lo) {
+void cc_608::parse(uint8_t hi, uint8_t lo) {
 
 	if (hi >= 0x18 && hi <= 0x1f)
 		hi = hi - 8;
@@ -30,11 +27,11 @@ void parse_608(uint8_t hi, uint8_t lo) {
 	if ((hi >= 0x14 && hi <= 0x15 && lo >= 0x20 && lo <= 0x2f) ||
 		(hi == 0x17 && lo >= 0x2e && 0x2f))
 	{
-		parse_608_command(hi, lo);
+		parse_command(hi, lo);
 	}
 }
 
-void parse_608_command(uint8_t hi, uint8_t lo) {
+void cc_608::parse_command(uint8_t hi, uint8_t lo) {
 	if (hi == 0x15) hi = 0x14;
 
 	if (hi == 0x14 || hi == 0x1C) {

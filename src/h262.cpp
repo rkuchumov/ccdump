@@ -2,25 +2,28 @@
 #include <cstdint>
 #include <cassert>
 
-#include "bitstream.h"
-#include "cc_block.h"
-
 #include "h262.h"
 
-void parse_gop();
-void parse_seq();
-void parse_pic();
+h262::h262(bitstream *input_):
+	input(input_)
+{
+	cc_block_parser = new cc_block(input);
+}
 
-void parse_h264() {
-	if (get_bytes(3) != 0x000001)
+h262::~h262() {
+	delete cc_block_parser;
+}
+
+void h262::parse() {
+	if (input->get_bytes(3) != 0x000001)
 		return;
 
-	switch (get_bytes(1)) {
+	switch (input->get_bytes(1)) {
 		case 0x00:
 			parse_pic();
 			break;
 		case 0xB2:
-			parse_atsc();
+			cc_block_parser->parse();
 			break;
 		case 0xB3:
 			printf("\n");
@@ -36,32 +39,32 @@ void parse_h264() {
 	return;
 }
 
-void parse_gop() {
-	printf("%lX\tGOP\t", get_offset());
+void h262::parse_gop() {
+	printf("%lX\tGOP\t", input->tell());
 
 	// Time code:
-	uint8_t tc_drop     = get_bits(1);
-	uint8_t tc_hours    = get_bits(5);
-	uint8_t tc_minutes  = get_bits(6);
-	get_bits(1); // Marker bit
-	uint8_t tc_seconds  = get_bits(6);
-	uint8_t tc_pictures = get_bits(6);
+	uint8_t tc_drop     = input->get_bits(1);
+	uint8_t tc_hours    = input->get_bits(5);
+	uint8_t tc_minutes  = input->get_bits(6);
+	input->get_bits(1); // Marker bit
+	uint8_t tc_seconds  = input->get_bits(6);
+	uint8_t tc_pictures = input->get_bits(6);
 
-	uint8_t closed      = get_bits(1);
-	uint8_t broken      = get_bits(1);
+	uint8_t closed      = input->get_bits(1);
+	uint8_t broken      = input->get_bits(1);
 
 	printf("drop:%d time:%d:%d:%d:%d closed:%d broken:%d\n", tc_drop,
 		tc_hours, tc_minutes, tc_seconds, tc_pictures,
 		closed, broken);
 }
 
-void parse_seq() {
-	printf("%lX\tSEQ\t", get_offset());
+void h262::parse_seq() {
+	printf("%lX\tSEQ\t", input->tell());
 
-	uint16_t hor_size     = get_bits(12);
-	uint16_t ver_size     = get_bits(12);
-	uint16_t aspect_ratio = get_bits(4);
-	uint16_t frame_rate   = get_bits(4);
+	uint16_t hor_size     = input->get_bits(12);
+	uint16_t ver_size     = input->get_bits(12);
+	uint16_t aspect_ratio = input->get_bits(4);
+	uint16_t frame_rate   = input->get_bits(4);
 
 	printf("w:%d h:%d", hor_size, ver_size);
 
@@ -90,11 +93,11 @@ void parse_seq() {
 	printf("\n");
 }
 
-void parse_pic() {
-	printf("%lX\tPIC\t", get_offset());
+void h262::parse_pic() {
+	printf("%lX\tPIC\t", input->tell());
 
-	uint16_t tref = get_bits(10);
-	uint8_t  type = get_bits(3);
+	uint16_t tref = input->get_bits(10);
+	uint8_t  type = input->get_bits(3);
 
 	printf("type:");
 	switch(type) {

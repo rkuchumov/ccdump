@@ -3,20 +3,34 @@
 
 #include <cstdlib>
 #include <cstdint>
+#include <cstdio>
 
-const size_t buffer_size = 2048;
+class bitstream
+{
+public:
+	bitstream (const char *input);
+	bitstream ();
 
-size_t get_offset();
+	~bitstream ();
 
-bool fill_buffer();
+	bool fill_buffer();
 
-bool read_next();
+	size_t tell();
 
-uint32_t get_bytes(size_t n);
+	bool read_next();
 
-uint32_t get_bits(size_t n);
+	uint32_t get_bytes(size_t n);
+	uint32_t get_bits(size_t n);
 
+private:
+	const size_t buffer_size = 2048;
+	uint8_t *buffer;
 
+	size_t offset;
+	size_t bits;
+
+	FILE *fp;
+};
 
 #endif /* end of include guard:  */
 
