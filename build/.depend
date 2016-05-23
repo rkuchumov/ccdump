@@ -1,0 +1,7 @@
+build/bitstream.o: src/bitstream.cpp include/bitstream.h
+build/608.o: src/608.cpp include/608.h
+build/ccdump.o: src/ccdump.cpp include/bitstream.h include/h262.h
+build/cc_block.o: src/cc_block.cpp include/bitstream.h include/608.h \
+ include/cc_block.h
+build/h262.o: src/h262.cpp include/bitstream.h include/cc_block.h \
+ include/h262.h
